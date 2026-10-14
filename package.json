@@ -1,6 +1,6 @@
 {
   "name": "mcp-polska",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Serwer MCP dla Claude: Biała lista VAT, KRS, kursy NBP, walidacja NIP — polskie rejestry publiczne bez klucza API.",
   "main": "index.js",
   "scripts": {

@@ -22,12 +22,17 @@ function nipPoprawny(nip) {
 async function pobierz(url) {
   const res = await fetch(url, { headers: { Accept: "application/json", "User-Agent": UA } });
   const tekst = await res.text();
-  let dane;
-  try { dane = JSON.parse(tekst); } catch { dane = { surowa_odpowiedz: tekst.slice(0, 500) }; }
+  let dane = null;
+  try { dane = JSON.parse(tekst); } catch {}
   if (!res.ok) {
-    const e = new Error(`HTTP ${res.status}: ${dane?.message || dane?.surowa_odpowiedz || res.statusText}`);
+    const e = new Error(`HTTP ${res.status}: ${dane?.message || tekst.slice(0, 120) || res.statusText}`);
     e.status = res.status;
     throw e;
+  }
+  if (dane === null) {
+    throw new Error(
+      "serwer zwrócił stronę zamiast danych — zwykle to chwilowa blokada anty-bot lub limit zapytań. Spróbuj za kilka minut albo sprawdź ręcznie w wyszukiwarce urzędu."
+    );
   }
   return dane;
 }
@@ -35,7 +40,7 @@ async function pobierz(url) {
 const ok = (obj) => ({ content: [{ type: "text", text: JSON.stringify(obj, null, 2) }] });
 const blad = (msg) => ({ isError: true, content: [{ type: "text", text: msg }] });
 
-const server = new McpServer({ name: "mcp-polska", version: "0.1.0" });
+const server = new McpServer({ name: "mcp-polska", version: "0.1.1" });
 
 server.registerTool(
   "nip_waliduj",
@@ -63,6 +68,7 @@ server.registerTool(
     if (!nipPoprawny(n)) return blad(`NIP ${n} ma błędną sumę kontrolną — sprawdź, czy nie ma literówki.`);
     try {
       const d = await pobierz(`https://wl-api.mf.gov.pl/api/search/nip/${n}?date=${data || dzis()}`);
+      if (!d.result?.subject) return blad(`Brak podmiotu o NIP ${n} na Białej liście (stan na ${data || dzis()}).`);
       return ok({ ...d.result, zrodlo: "wl-api.mf.gov.pl" });
     } catch (e) {
       return blad(`Biała lista: ${e.message}`);
@@ -90,6 +96,7 @@ server.registerTool(
       const d = await pobierz(
         `https://wl-api.mf.gov.pl/api/check/nip/${n}/bank-account/${k}?date=${data || dzis()}`
       );
+      if (!d.result) return blad("Biała lista: nieoczekiwana odpowiedź serwera MF.");
       return ok({ nip: n, konto_koncowka: k.slice(-4), przypisane: d.result.accountAssigned, requestId: d.result.requestId, data: data || dzis() });
     } catch (e) {
       return blad(`Biała lista: ${e.message}`);
