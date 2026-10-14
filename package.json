@@ -1,0 +1,36 @@
+{
+  "name": "mcp-polska",
+  "version": "0.1.0",
+  "description": "Serwer MCP dla Claude: Biała lista VAT, KRS, kursy NBP, walidacja NIP — polskie rejestry publiczne bez klucza API.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "mcp",
+    "claude",
+    "polska",
+    "krs",
+    "nip",
+    "vat",
+    "nbp",
+    "biala-lista"
+  ],
+  "author": "Auto-mate (auto-mate.space)",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "zod": "^4.6.7"
+  },
+  "type": "module",
+  "bin": {
+    "mcp-polska": "index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/auto-mate-pl/mcp-polska"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
